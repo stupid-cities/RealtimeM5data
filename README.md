@@ -10,9 +10,14 @@ There are four components for this project.
 
 The M5 has the wifi SSID, passcode and IPaddress of the websocket host hard coded.
 
-Start the router
-Connect the server device to teh wifi and run the Node server.
+Start the router.
+
+Connect the server device to the wifi and run the Node server.
+
 power on the M5stciks running the M5StickIMUWebsockets code.
-You should see data in the console where you ran the node server
-Connect the web client device to wifi and run the test or whatever client code
+
+You should see data in the console where you ran the node server.
+
+Connect the web client device to wifi and run the test or whatever client code.
+
 
