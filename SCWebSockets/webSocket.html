@@ -1,0 +1,99 @@
+<html>
+<head>
+
+<script>
+var connection = new WebSocket('ws://127.0.0.1:8011/', ['arduino']);
+var dataPoints=[];
+
+connection.onopen = function () {
+	//send browser identity string
+	connection.send('IAMABROWSER');
+
+/*	setInterval(function() {
+		connection.send('Time: ' + new Date());
+	}, 20);
+*/
+	connection.send('Time: ' + new Date());
+};
+
+connection.onerror = function (error) {
+	console.log('WebSocket Error ', error);
+};
+
+connection.onmessage = function (e) {
+	console.log('Server: ', e.data);
+	// var client=Number(e.data.slice(0,3));
+	// var type=e.data.slice(3,7);
+	// var data=Number(e.data.slice(7))+1;
+	// console.log(client+":"+type+":"+data);
+	// connection.send('Time: ' + new Date());
+	processData(e.data);
+};
+
+function sendRGB() {
+	var r = parseInt(document.getElementById('r').value).toString(16);
+	var g = parseInt(document.getElementById('g').value).toString(16);
+	var b = parseInt(document.getElementById('b').value).toString(16);
+	if(r.length < 2) { r = '0' + r; }
+	if(g.length < 2) { g = '0' + g; }
+	if(b.length < 2) { b = '0' + b; }
+	var rgb = '#'+r+g+b;
+	console.log('RGB: ' + rgb);
+	connection.send(rgb);
+}
+
+function processData(data){
+	//data format=SCDV+000+TYPE+0.000000
+	//values for slice=0-4, 4-7, 7-11,
+
+	done=false;
+	var signal=data.slice(0,4);
+	if(signal!=="SCDV"){
+		done=false;
+	} else {
+		var client=Number(data.slice(4,7));
+		var type=data.slice(7,11);
+		var data=Number(data.slice(11));
+		console.log(client+":"+type+":"+data);
+		var foundClient=null;
+		dataPoints.forEach(function(dp){
+			if(dp.id===client){
+				foundClient=dp;
+			}
+		});
+		if(foundClient!=null){
+			foundClient[type]=data;
+		} else {
+			dataPoint=new DataPoint(client);
+			dataPoints.push(dataPoint);
+		}
+		done=true;
+		console.log(dataPoints);
+	}
+	return done;
+}
+
+function DataPoint(id){
+	this.id=id;
+	this.GYRX=0;
+	this.GYRY=0;
+	this.GYRZ=0;
+	this.ACCX=0;
+	this.ACCY=0;
+	this.ACCZ=0;
+	this.PITC=0;
+	this.ROLL=0;
+	this.YAWW=0;
+}
+
+</script>
+
+</head>
+<body>
+LED Control:<br/>
+<br/>
+R: <input id="r" type="range" min="0" max="255" step="1" onchange="sendRGB();" /><br/>
+G: <input id="g" type="range" min="0" max="255" step="1" onchange="sendRGB();" /><br/>
+B: <input id="b" type="range" min="0" max="255" step="1" onchange="sendRGB();" /><br/>
+</body>
+</html>
