@@ -20,4 +20,7 @@ You should see data in the console where you ran the node server.
 
 Connect the web client device to wifi and run the test or whatever client code.
 
-
+### Visualisations
+Added Visualisations folder
+SC_IMUwebsocketsP5dataMover is a test visual to show relationship between IMU data and integrated motion
+SC_IMUPlasmaBall is the first creative visualisation
