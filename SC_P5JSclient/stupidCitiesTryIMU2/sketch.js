@@ -13,6 +13,7 @@ function draw() {
   cg.show();
   var av=cg.get();
   var la=cg.getA();
+  // console.log(av,la);
   mover.run(av,la);
   mover.show();
 }
