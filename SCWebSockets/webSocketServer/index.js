@@ -44,6 +44,7 @@ wsServer.on('request', function(request) {
     console.log((new Date()) + ' Connection accepted.');
     var connectionID=nextConnectionID++;
 
+
 	  connection.on('message', function(message) {
         if (message.type === 'utf8') {
             console.log('Received Message: ' + message.utf8Data);
@@ -69,7 +70,10 @@ wsServer.on('request', function(request) {
         console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
     });
 
-	connection.sendUTF("Hallo Client!");
+    var ids=("00"+connectionID).slice(-2);
+    console.log("connection id: "+ids);
+    connection.sendUTF("Hello Client!"+"WID");
+    connection.sendUTF("WID"+ids);
 });
 
 function decode_utf8( s )

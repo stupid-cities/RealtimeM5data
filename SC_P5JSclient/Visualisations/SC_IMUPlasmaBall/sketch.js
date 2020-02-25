@@ -8,25 +8,23 @@ var gyroSensitivity=-10;
 var accSensitivity=-50;
 var plasmaBalls;
 var invert=false;
+var numMovers=0;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   colorMode(HSB);
   
-  movers.push(new Mover(0,250,350,50,200,0.75));
-  movers.push(new Mover(1,550,350,50,200,0.55));
+  // movers.push(new Mover(0,250,350,50,200,0.75));
+  // movers.push(new Mover(1,550,350,50,200,0.55));
   
   plasmaBalls=new PlasmaBalls();
 }
 
 function draw() {
+  if(dataPoints.length>movers.length+1){
+    movers.push(new Mover(movers.length,250,350,50,200,0.75));
+  }
   background(0);
-  // showData();
-  // if(dataPoints.length>1){
-  //   var av=gyroSensitivity * dataPoints[1].meanVals["GYRZ"].get();
-  //   var la=accSensitivity * dataPoints[1].meanVals["ACCY"].get();
-  //   mover.run(av,la);
-  // }
   moverPos=[];
   for(var i=0; i<movers.length; i++){
     if(dataPoints.length>i+1){
@@ -35,7 +33,7 @@ function draw() {
       movers[i].run(av,la);
       moverPos.push(movers[i].getPos());
     }
-    movers[i].show();
+    //movers[i].show();
   }
   
   plasmaBalls.run(moverPos);

@@ -35,7 +35,8 @@ float yaw   = 0.0F;
 
 boolean connected=false;
 byte mac[6];                     // the MAC address of your Wifi shield
-
+int myID = -1;
+String myIDs = "--";
 
 #define USE_SERIAL Serial
 
@@ -58,16 +59,19 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
     case WStype_DISCONNECTED:
       USE_SERIAL.printf("[WSc] Disconnected!\n");
       connected=false;
+      myIDs = "--";
+      updateM5();
       break;
     case WStype_CONNECTED:
       USE_SERIAL.printf("[WSc] Connected to url: %s\n", payload);
       connected=true;
       // send message to server when Connected
       webSocket.sendTXT("Connected");
+      updateM5();
       break;
     case WStype_TEXT:
       USE_SERIAL.printf("[WSc] get text: %s\n", payload);
-
+      checkForID((char*)payload);
       // send message to server
       // webSocket.sendTXT("message here");
       break;
@@ -105,7 +109,15 @@ void setup() {
     USE_SERIAL.flush();
     delay(1000);
   }
-
+  M5.Lcd.setRotation(3);
+  M5.Lcd.setTextColor(0x00, 0x51d);
+  M5.Lcd.fillScreen(BLACK);
+  M5.Lcd.setTextSize(1);
+  M5.Lcd.setCursor(0, 0);
+  M5.Lcd.println("Stupid Cities Motion Viz");
+  M5.Lcd.setCursor(0, 10);
+  M5.Lcd.setTextColor(0xFF, 0x00);
+  M5.Lcd.println("Waiting for WiFi ...");
   WiFiMulti.addAP("Crispy", "peppersalt");
 
   //WiFi.disconnect();
@@ -126,26 +138,27 @@ void setup() {
   // try ever 5000 again if connection has failed
   webSocket.setReconnectInterval(5000);
   M5.IMU.Init();
-  M5.Lcd.setRotation(3);
-  M5.Lcd.fillScreen(BLACK);
-  M5.Lcd.setTextSize(1);
-  M5.Lcd.setCursor(40, 0);
-  M5.Lcd.println("IMU TEST");
-  M5.Lcd.setCursor(0, 10);
-  M5.Lcd.println(connected?"Connected":"disconnected");
-  M5.Lcd.setCursor(0, 20);
-  M5.Lcd.print("MAC: ");
-  M5.Lcd.print(mac[5],HEX);
-  M5.Lcd.print(":");
-  M5.Lcd.print(mac[4],HEX);
-  M5.Lcd.print(":");
-  M5.Lcd.print(mac[3],HEX);
-  M5.Lcd.print(":");
-  M5.Lcd.print(mac[2],HEX);
-  M5.Lcd.print(":");
-  M5.Lcd.print(mac[1],HEX);
-  M5.Lcd.print(":");
-  M5.Lcd.println(mac[0],HEX);
+  updateM5();
+//  M5.Lcd.setRotation(3);
+//  M5.Lcd.fillScreen(BLACK);
+//  M5.Lcd.setTextSize(1);
+//  M5.Lcd.setCursor(40, 0);
+//  M5.Lcd.println("IMU TEST");
+//  M5.Lcd.setCursor(0, 10);
+//  M5.Lcd.println(connected?"Connected":"disconnected");
+//  M5.Lcd.setCursor(0, 20);
+//  M5.Lcd.print("MAC: ");
+//  M5.Lcd.print(mac[5],HEX);
+//  M5.Lcd.print(":");
+//  M5.Lcd.print(mac[4],HEX);
+//  M5.Lcd.print(":");
+//  M5.Lcd.print(mac[3],HEX);
+//  M5.Lcd.print(":");
+//  M5.Lcd.print(mac[2],HEX);
+//  M5.Lcd.print(":");
+//  M5.Lcd.print(mac[1],HEX);
+//  M5.Lcd.print(":");
+//  M5.Lcd.println(mac[0],HEX);
 //  M5.Lcd.println("  X       Y       Z");
 //  M5.Lcd.setCursor(0, 50);
 //  M5.Lcd.println("  Pitch   Roll    Yaw");
@@ -195,4 +208,43 @@ void loop() {
   webSocket.sendTXT("ROLL"+String(roll,5));
   webSocket.sendTXT("YAWW"+String(yaw,5));
   delay(200);
+}
+
+void checkForID(String data){
+  String ids;
+  if(data.substring(0,3)=="WID"){
+    ids=data.substring(3);
+    myIDs=ids;
+  }
+  USE_SERIAL.printf("[WSc] myID: %s\n", ids);
+  updateM5();
+}
+
+void updateM5(){
+  M5.Lcd.setRotation(3);
+  M5.Lcd.setTextColor(0x00, 0x51d);
+  M5.Lcd.fillScreen(BLACK);
+  M5.Lcd.setTextSize(1);
+  M5.Lcd.setCursor(0, 0);
+  M5.Lcd.println("Stupid Cities Motion Viz");
+  M5.Lcd.setCursor(0, 10);
+  M5.Lcd.setTextColor(0xFF, 0x00);
+  M5.Lcd.println(connected?"Connected":"disconnected");
+  M5.Lcd.setCursor(0, 20);
+  M5.Lcd.print("MAC: ");
+  M5.Lcd.print(mac[0],HEX);
+  M5.Lcd.print(":");
+  M5.Lcd.print(mac[1],HEX);
+  M5.Lcd.print(":");
+  M5.Lcd.print(mac[2],HEX);
+  M5.Lcd.print(":");
+  M5.Lcd.print(mac[3],HEX);
+  M5.Lcd.print(":");
+  M5.Lcd.print(mac[4],HEX);
+  M5.Lcd.print(":");
+  M5.Lcd.println(mac[5],HEX);
+  M5.Lcd.setCursor(0, 40);
+  M5.Lcd.setTextSize(5);
+  M5.Lcd.setTextColor(0x00, 0xfbe4);
+  m5.Lcd.println(myIDs);
 }
