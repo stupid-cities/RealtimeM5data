@@ -5,12 +5,11 @@ var connection = new WebSocket('ws://127.0.0.1:8011/', ['arduino']);
 var dataPoints=[];
 var movers=[];
 var gyroSensitivity=-10;
-var accSensitivity=-50;
+var accSensitivity=-5000;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   colorMode(HSB);
-  
   movers.push(new Mover(0,250,350,50,200,0.75));
   movers.push(new Mover(1,550,350,50,200,0.55));
 }
@@ -77,7 +76,7 @@ function Particle(id,x,y,s,cHue){
   var acc=createVector(0,0);
   var trail=[];
   var trailMax=200;
-  var friction=1-0.01;
+  var friction=1-0.05;
   var lar=0;
   
   this.show=function(){
@@ -114,7 +113,7 @@ function Particle(id,x,y,s,cHue){
   this.run=function(a,la){
     lar=la;
     // console.log(pos.x, pos.y);
-    speed-=la;
+    speed=-la;
     speed*=friction;
     vel.rotate(-vel.heading()+a);
     vel.setMag(speed);

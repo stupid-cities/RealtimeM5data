@@ -4,8 +4,8 @@ var types=["GYRX","GYRY","GYRZ","ACCX","ACCY","ACCZ","PITC","ROLL","YAWW"];
 var connection = new WebSocket('ws://127.0.0.1:8011/', ['arduino']);
 var dataPoints=[];
 var movers=[];
-var gyroSensitivity=-10;
-var accSensitivity=-50;
+var gyroSensitivity=-20;
+var accSensitivity=-500;
 var inkTrails=[];
 var invert=false;
 var numMovers=0;
@@ -64,10 +64,10 @@ function SplotTrail(id){
 }
 
 function Splot(x,y,ir){
-  var ttlMax=100;
+  var ttlMax=70;
   var ttl=ttlMax;
   var verts=[];
-  var numVerts=50;
+  var numVerts=40;
   var cHue=random(-5,5);
   var sat=random(70,80);
   var bri=random(80,90);
@@ -95,7 +95,7 @@ function Splot(x,y,ir){
   this.show=function(id){
     push();
     translate(x,y);
-    fill((240+id*100+cHue)%360,sat*ttl/ttlMax, bri*ttl/ttlMax,ttl/ttlMax);
+    fill((240+id*100+cHue)%360,50+sat*0.5*(1-ttl/ttlMax), bri*ttl/ttlMax,ttl/ttlMax);
     noStroke();
     beginShape();
     verts.forEach(function(v){
@@ -116,7 +116,7 @@ function Particle(id,x,y,s,cHue){
   var acc=createVector(0,0);
   var trail=[];
   var trailMax=200;
-  var friction=1-0.01;
+  var friction=1-0.1;
   var lar=0;
   
   this.show=function(){
