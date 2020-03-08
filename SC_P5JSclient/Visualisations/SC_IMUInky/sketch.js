@@ -41,6 +41,7 @@ function draw() {
   }
 }
 
+// function
 
 function SplotTrail(id){
   var splots=[];
