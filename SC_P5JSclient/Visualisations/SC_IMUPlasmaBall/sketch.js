@@ -82,7 +82,7 @@ function PParticle(callerID,x,y, rad){
   var acc;
   var ttlInit=40;
   var ttl=ttlInit;
-  var baseHue=callerID*120+0;
+  var baseHue=callerID*60+0;
   
   this.update=function(){
     var acc=p5.Vector.random2D();
