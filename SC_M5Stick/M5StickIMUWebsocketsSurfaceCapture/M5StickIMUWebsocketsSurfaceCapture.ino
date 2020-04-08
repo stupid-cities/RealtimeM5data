@@ -38,6 +38,8 @@ int last_button_value = 1;
 int cur_button_value = 1;
 boolean capture=false;
 
+unsigned long baseTime;
+
 
 boolean connected=false;
 byte mac[6];                     // the MAC address of your Wifi shield
@@ -181,8 +183,12 @@ void loop() {
   if(cur_button_value !=last_button_value){
     if(cur_button_value==1){ //released
       capture=!capture;
+      
       updateState();
     }
+  }
+  if(!capture){
+    baseTime=millis();
   }
   last_button_value = cur_button_value;
   Serial.print(cur_button_value);
@@ -225,6 +231,7 @@ void loop() {
   webSocket.sendTXT("ROLL"+String(roll,5));
   webSocket.sendTXT("YAWW"+String(yaw,5));
   webSocket.sendTXT("CAPT"+String(capture,5));
+  webSocket.sendTXT("TIME"+String(millis()-baseTime,8));
   delay(20);
 }
 
