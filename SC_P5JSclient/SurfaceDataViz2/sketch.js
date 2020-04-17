@@ -96,21 +96,21 @@ function drawData(data,x,y,w,h){
   var xProg=0;
   
   console.log(data.size);
-  for(var i=0; i<data.size; i++){
-    var ay=data.ACCY[i];
-    xProg=data.TIME[i]*xStep;
-    // console.log(xProg, ay);
-    // ellipse(xProg,-1,2);
-    line(xProg,0,xProg,-ay*100);
-    push();
-    translate(xProg,-50);
-    stroke(0,100,100);
-    rotate(-data.ROLL[i]*PI/180);
-    line(0,0,20,0);
-    pop();
-  }
+  // for(var i=0; i<data.size; i++){
+  //   var ay=data.ACCY[i];
+  //   xProg=data.TIME[i]*xStep;
+  //   // console.log(xProg, ay);
+  //   // ellipse(xProg,-1,2);
+  //   line(xProg,0,xProg,-ay*100);
+  //   push();
+  //   translate(xProg,-50);
+  //   stroke(0,100,100);
+  //   rotate(-data.ROLL[i]*PI/180);
+  //   line(0,0,20,0);
+  //   pop();
+  // }
   
-  translate(0,-h/2);
+  // translate(0,-h/2);
   
   
   // calc base slope
@@ -137,6 +137,8 @@ function drawData(data,x,y,w,h){
   var ang=0;
   // vertex(x,y);
   verts.push({x:x, y:y});
+  var maxAvgAngle=0;
+  var numAngles=10;
   for(var i=0; i<data.size; i++){
     var ay=data.ACCY[i];
     var timeNow=data.TIME[i];
@@ -166,9 +168,21 @@ function drawData(data,x,y,w,h){
   // noFill();
   // endShape();
   prevTime=0;
+  var scaleX=w/x;
+  var scaleY=1;//h/y;
   
-  //render
-  
+  //render vertices
+  push();
+  // scale(scaleX,scaleY);
+  beginShape();
+  verts.forEach(function(v){
+    vertex(v.x*scaleX,v.y*scaleY);
+  });
+  stroke(20,100,100);
+  strokeWeight(2);
+  noFill();
+  endShape();
+  pop();
   // beginShape();
   
   // var x=y=0;
