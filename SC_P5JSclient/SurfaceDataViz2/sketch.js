@@ -1,3 +1,5 @@
+var accessSet=0;
+
 var ranges={};
 // var GYRX=0, GYRY=1, GYRZ=2, ACCX=3, ACCY=4, ACCZ=5, ROLL=6, PITC=7, YAWW=8;
 var types=["GYRX","GYRY","GYRZ","ACCX","ACCY","ACCZ","PITC","ROLL","YAWW","TIME"];
@@ -10,7 +12,14 @@ var surfaceData;
 var lastDataSet=null;
 var structured;
 var dataRetrieved=false;
-
+var timeSpan
+var slopeCalced=false;
+var verts=[];
+var xMax=0;
+var scaleXFactor=0.2;
+var meanMaxSlope;
+var meanMaxSlopeSamples=10;
+var slopeSamples=[];
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -58,10 +67,12 @@ function retrieveData(){
         lastDataIndex=i;
       }
     });
-    if(lastDataIndex>-1){
-      lastDataSet=data[datakeys[lastDataIndex]];
+    if(lastDataIndex-accessSet>-1){
+      lastDataSet=data[datakeys[lastDataIndex-accessSet]];
       dataRetrieved=true;
       structured=new StructuredIMUData(lastDataSet);
+    } else {
+      console.log("No dataset: "+lastDataIndex-accessSet);
     }
   });
   // noLoop();
@@ -75,12 +86,101 @@ function draw() {
   noStroke();
   textSize(10);
   textAlign(LEFT,BASELINE);
-  text(dataRetrieved,100,100);
+  text(dataRetrieved,100,80);
   if(dataRetrieved){
-    text(new Date(lastDataSet.date),100,120);
-    drawData(structured,100,100,400,250);
+    calcSlope(structured);
+    text(new Date(lastDataSet.date),100,90);
+    showSlope(100,100,400,250);
+    // if(slopeCalced){
+    //   text(new Date(lastDataSet.date),100,90);
+    //   showSlope(100,100,400,250);
+    // } else {
+    //   calcSlope(structured);
+    //   slopeCalced=true;
+    // }
+    // drawData(structured,100,100,400,250);
     noLoop();
   }
+}
+
+function calcSlope(data){
+  timeSpan=data.TIME[data.TIME.length-1];
+  console.log(data.size);
+
+  // calc base slope
+  var sum=0;
+  var count=10;
+  var avg=0;
+  for(var i=0; i<count; i++){
+    sum+=data.ROLL[i];
+  }
+  avg=sum/count;
+  var baseSlope=avg*PI/180;
+  console.log(baseSlope);
+  
+  
+  // calculate vertices
+  var linVel=0;
+  var linAcc=0;
+  var prevTime=0;
+  
+  // beginShape();
+  
+  var x=y=0;
+  var px=py=0;
+  var ang=0;
+  // vertex(x,y);
+  verts.push({x:x, y:y});
+  var maxAvgAngle=0;
+  var numAngles=10;
+  for(var i=0; i<data.size; i++){
+    var ay=data.ACCY[i];
+    var timeNow=data.TIME[i];
+    var timeInc=timeNow-prevTime;
+    prevTime=timeNow;
+    linAcc=ay;//-gravityEffectOnY;
+    linVel+=linAcc;
+    ang=data.ROLL[i]*PI/180-baseSlope;
+    slopeSamples.push(ang);
+    x+=cos(-ang)*linVel*timeInc;
+    y+=sin(-ang)*linVel*timeInc;
+    verts.push({x:x, y:y, lv:linVel});
+  }
+  xMax=x;
+  slopeSamples.sort();
+  slopeSamples=slopeSamples.splice(-meanMaxSlopeSamples);
+  meanMaxSlope=slopeSamples.reduce(function(a,ss){return a+ss;},0)/meanMaxSlopeSamples;
+  // console.log(slopeSamples);
+  console.log(meanMaxSlope, degrees(meanMaxSlope));
+}
+
+function showSlope(x,y,w,h){
+  // var timeSpan=data.TIME[data.TIME.length-1];
+  var xStep=w/timeSpan;
+  // console.log(timeSpan,xStep);
+  push();
+  translate(x,y);
+  fill(0,0,40);
+  stroke(0,0,100);
+  rect(0,0,w,h);
+  translate(0,h);
+  var xProg=0;
+  var scaleX=w/(xMax*xStep*scaleXFactor);
+  // console.log(w,xMax);
+  var scaleY=1;//h/y;push();
+  // scale(scaleX,scaleY);
+  beginShape();
+  verts.forEach(function(v){
+    vertex(v.x*scaleX*xStep*scaleXFactor,v.y*scaleY*xStep*scaleXFactor);
+  });
+  stroke(20,100,100);
+  strokeWeight(2);
+  noFill();
+  endShape();
+  stroke(0,200,150);
+  line(0,0,cos(-meanMaxSlope)*h, sin(-meanMaxSlope)*h);
+  pop();
+  pop();
 }
 
 function drawData(data,x,y,w,h){
@@ -169,6 +269,7 @@ function drawData(data,x,y,w,h){
   // endShape();
   prevTime=0;
   var scaleX=w/x;
+  console.log(w,x,scaleX);
   var scaleY=1;//h/y;
   
   //render vertices
