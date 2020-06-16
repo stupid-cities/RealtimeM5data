@@ -1,4 +1,4 @@
-var accessSet=0;
+var accessSet=2;
 
 var ranges={};
 // var GYRX=0, GYRY=1, GYRZ=2, ACCX=3, ACCY=4, ACCZ=5, ROLL=6, PITC=7, YAWW=8;
@@ -144,7 +144,7 @@ function calcSlope(data){
     slopeSamples.push(ang);
     x+=cos(-ang)*linVel*timeInc;
     y+=sin(-ang)*linVel*timeInc;
-    verts.push({x:x, y:y, lv:linVel});
+    verts.push({x:x, y:y, lv:linVel, la:linAcc});
   }
   xMax=x;
   slopeSamples.sort();
@@ -172,6 +172,9 @@ function showSlope(x,y,w,h){
   beginShape();
   verts.forEach(function(v){
     vertex(v.x*scaleX*xStep*scaleXFactor,v.y*scaleY*xStep*scaleXFactor);
+    stroke(255);
+    strokeWeight(0.5);
+    line(v.x*scaleX*xStep*scaleXFactor,v.y*scaleY*xStep*scaleXFactor,v.x*scaleX*xStep*scaleXFactor,v.y*scaleY*xStep*scaleXFactor-v.lv);
   });
   stroke(20,100,100);
   strokeWeight(2);
